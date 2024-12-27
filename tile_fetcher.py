@@ -1,7 +1,6 @@
 import aiohttp
 import time
 from typing import Optional, List
-import pygame
 
 
 class TileFetcher:

@@ -2,10 +2,14 @@ import pygame
 import random
 import math
 from .person_attributes import PersonAttributes
-from typing import Tuple
+from .prayer import Prayer
+from typing import List
 
 
 class Person:
+    # Custom event for resetting prayer color
+    RESET_PRAYER_COLOR_EVENT = pygame.USEREVENT + 1
+
     def __init__(self, x: float, y: float, radius: int = 10):
         self.x = x
         self.y = y
@@ -14,6 +18,7 @@ class Person:
         self.speed = 30
         self.move_target = None
         self.attributes = PersonAttributes()
+        self.default_color = (255, 0, 0)  # Store default color
 
     def set_random_target(
         self,
@@ -31,8 +36,34 @@ class Person:
         # Clamp to bounds
         self.move_target = (max(0, min(target_x, max_x)), max(0, min(target_y, max_y)))
 
+    def handle_event(self, event: pygame.event.Event):
+        """Handle pygame events for this person"""
+        if event.type == self.RESET_PRAYER_COLOR_EVENT:
+            self.color = self.default_color
+
+    def get_active_prayers(self) -> List[Prayer]:
+        """Get all unanswered prayers"""
+        return [p for p in self.attributes.prayers if not p.answered]
+
+    def handle_prayer_response(self, prayer: Prayer, response_type: str):
+        """Handle a response to a prayer"""
+        prayer.answer(response_type)
+        
+        # Adjust faith based on response
+        if response_type == "accepted":
+            self.attributes.faith = min(1.0, self.attributes.faith + 0.1)
+            self.color = (0, 255, 0)  # Green for accepted prayers
+        elif response_type == "denied":
+            self.attributes.faith = max(0.0, self.attributes.faith - 0.05)
+            self.color = (255, 165, 0)  # Orange for denied prayers
+        # Delayed prayers don't affect faith
+        
+        # Reset color after 1 second
+        pygame.time.set_timer(self.RESET_PRAYER_COLOR_EVENT, 1000, loops=1)
+
     def update(self, delta_time: float):
-        """Update person's position"""
+        """Update person's position and generate prayers"""
+        # Update movement
         if self.move_target:
             dx = self.move_target[0] - self.x
             dy = self.move_target[1] - self.y
@@ -46,6 +77,14 @@ class Person:
                 # Normalize and apply speed
                 self.x += (dx / distance) * self.speed * delta_time
                 self.y += (dy / distance) * self.speed * delta_time
+        
+        # Generate prayer if possible
+        prayer = self.attributes.generate_prayer()
+        if prayer:
+            # Change color temporarily when praying
+            self.color = (0, 0, 255)  # Blue
+            # Reset color after 1 second
+            pygame.time.set_timer(self.RESET_PRAYER_COLOR_EVENT, 1000, loops=1)
 
     def draw(
         self, screen: pygame.Surface, view_x: float, view_y: float, zoom_level: float

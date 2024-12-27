@@ -1,6 +1,6 @@
 import pygame
 import math
-from typing import Tuple, List, Optional
+from typing import Tuple, List
 
 
 class TileRenderer:

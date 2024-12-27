@@ -1,6 +1,5 @@
 import asyncio
 from typing import Set, Tuple, Optional, Callable
-import pygame
 
 
 class BackgroundLoader:

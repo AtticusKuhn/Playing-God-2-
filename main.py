@@ -1,110 +1,140 @@
-import pygame
+"""Main game module."""
 import sys
 import asyncio
+import pygame
+from typing import Optional
+
+from config import WindowConfig
 from map_manager import MapManager
 from managers.people_manager import PeopleManager
-
-# Initialize Pygame
-pygame.init()
-
-# Constants
-WINDOW_WIDTH = 1024
-WINDOW_HEIGHT = 768
-ZOOM_SPEED = 0.01
-PAN_SPEED = 10
-
+from managers.camera_manager import CameraManager
+from ui.prayer_ui import PrayerUI
 
 class Game:
+    """Main game class managing the game loop and components."""
+
     def __init__(self):
-        self.screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
-        pygame.display.set_caption("World Map Game")
-        self.clock = pygame.time.Clock()
+        """Initialize the game and its components."""
+        try:
+            # Initialize Pygame
+            if not pygame.get_init():
+                pygame.init()
+                
+            # Set up display
+            self.screen = pygame.display.set_mode((WindowConfig.WIDTH, WindowConfig.HEIGHT))
+            pygame.display.set_caption(WindowConfig.TITLE)
+            self.clock = pygame.time.Clock()
 
-        # Initialize managers
-        self.map_manager = MapManager(WINDOW_WIDTH, WINDOW_HEIGHT)
-        self.people_manager = PeopleManager(
-            map_width=WINDOW_HEIGHT, map_height=WINDOW_HEIGHT
-        )
+            # Initialize managers
+            self.camera = CameraManager()
+            self.map_manager = MapManager(WindowConfig.WIDTH, WindowConfig.HEIGHT)
+            self.people_manager = PeopleManager(
+                map_width=WindowConfig.HEIGHT,
+                map_height=WindowConfig.HEIGHT
+            )
+            self.prayer_ui = PrayerUI()
 
-        # Add some initial people
-        self.people_manager.add_random_people(100)
+            # Add initial population
+            self.people_manager.add_random_people(100)
 
-        # Camera/view properties
-        self.zoom_level = 1.0
-        # Initialize view to London coordinates
-        # lon, lat = -0.1278, 51.5074  # London coordinates
-        # self.view_x, self.view_y = self.map_manager.lat_lon_to_pixel(lat, lon, 2)
-        self.view_x = 0
-        self.view_y = 0
-        print(f"Initial view position: ({self.view_x}, {self.view_y})")
+        except pygame.error as e:
+            print(f"Failed to initialize game: {e}")
+            raise
 
-    def handle_input(self):
+    def handle_input(self) -> bool:
+        """Handle input events.
+        
+        Returns:
+            bool: False if the game should exit, True otherwise
+        """
+        events = pygame.event.get()
         keys = pygame.key.get_pressed()
 
-        # Pan with arrow keys
-        if keys[pygame.K_LEFT]:
-            self.view_x -= PAN_SPEED / self.zoom_level
-        if keys[pygame.K_RIGHT]:
-            self.view_x += PAN_SPEED / self.zoom_level
-        if keys[pygame.K_UP]:
-            self.view_y -= PAN_SPEED / self.zoom_level
-        if keys[pygame.K_DOWN]:
-            self.view_y += PAN_SPEED / self.zoom_level
-        if keys[pygame.K_p]:
-            self.zoom_level *= 1 + ZOOM_SPEED
-        if keys[pygame.K_MINUS]:
-            self.zoom_level *= 1 - ZOOM_SPEED
-        if keys[pygame.K_EQUALS]:
-            self.zoom_level = 1
-
-        # Handle mouse events for zooming
-        for event in pygame.event.get():
+        for event in events:
             if event.type == pygame.QUIT:
                 return False
-            elif event.type == pygame.MOUSEWHEEL:
-                # Zoom in/out with mouse wheel
-                if event.y > 0:  # Scroll up
-                    self.zoom_level *= 1 + ZOOM_SPEED
-                else:  # Scroll down
-                    self.zoom_level *= 1 - ZOOM_SPEED
-                # Clamp zoom level
-                self.zoom_level = max(0.5, min(self.zoom_level, 5.0))
+
+            # Handle prayer-related events
+            if event.type == self.people_manager.PRAYER_RECEIVED_EVENT:
+                self.prayer_ui.show_prayer(event.prayer_id)
+            elif event.type == pygame.KEYDOWN and event.key == pygame.K_TAB:
+                self.prayer_ui.toggle_visibility()
+
+            # Forward events to people manager
+            self.people_manager.handle_event(event)
+
+            # Handle prayer UI input
+            if prayer_response := self.prayer_ui.handle_input(event, self.people_manager.active_prayers):
+                prayer_id, response_type = prayer_response
+                self.people_manager.answer_prayer(prayer_id, response_type)
+                self.prayer_ui.selected_prayer_id = None
+
+        # Handle camera input when prayer UI is not visible
+        if not self.prayer_ui.visible:
+            self.camera.handle_input(keys, events)
 
         return True
 
-    def update(self):
-        print(
-            f"Game state - zoom: {self.zoom_level}, pos: ({self.view_x}, {self.view_y})"
-        )
-        self.map_manager.update(self.view_x, self.view_y, self.zoom_level)
-        self.people_manager.update()
+    def update(self) -> None:
+        """Update game state."""
+        try:
+            view_x, view_y, zoom = self.camera.get_transform_params()
+            self.map_manager.update(view_x, view_y, zoom)
+            self.people_manager.update()
+        except Exception as e:
+            print(f"Error updating game state: {e}")
 
-    def draw(self):
-        self.screen.fill((0, 0, 255))  # Clear screen
-        self.map_manager.draw(self.screen)
-        self.people_manager.draw(self.screen, self.view_x, self.view_y, self.zoom_level)
-        pygame.display.flip()
+    def draw(self) -> None:
+        """Draw the game state."""
+        try:
+            # Clear screen
+            self.screen.fill((0, 0, 255))
 
-    async def game_loop(self):
+            # Get current camera transform
+            view_x, view_y, zoom = self.camera.get_transform_params()
+
+            # Draw game elements
+            self.map_manager.draw(self.screen)
+            self.people_manager.draw(self.screen, view_x, view_y, zoom)
+            self.prayer_ui.draw(self.screen, self.people_manager.active_prayers)
+
+            # Update display
+            pygame.display.flip()
+        except pygame.error as e:
+            print(f"Error drawing game state: {e}")
+
+    async def game_loop(self) -> None:
+        """Main game loop."""
         running = True
         while running:
-            running = self.handle_input()
-            self.update()
-            self.draw()
-            self.clock.tick(60)
-            # Allow other async operations to run
-            await asyncio.sleep(0)
+            try:
+                running = self.handle_input()
+                self.update()
+                self.draw()
+                self.clock.tick(WindowConfig.FPS)
+                await asyncio.sleep(0)  # Allow other async operations to run
+            except Exception as e:
+                print(f"Error in game loop: {e}")
+                running = False
 
         # Cleanup
-        self.map_manager.cleanup()
-        pygame.quit()
+        self.cleanup()
 
+    def cleanup(self) -> None:
+        """Clean up resources."""
+        try:
+            self.map_manager.cleanup()
+            pygame.quit()
+        except Exception as e:
+            print(f"Error during cleanup: {e}")
 
-def main():
-    # Set up the event loop
+def main() -> None:
+    """Entry point for the game."""
+    # Set up the event loop policy for Windows
     if sys.platform == "win32":
         asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
+    # Create and run event loop
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
 
@@ -113,10 +143,11 @@ def main():
         loop.run_until_complete(game.game_loop())
     except KeyboardInterrupt:
         print("Game interrupted by user")
+    except Exception as e:
+        print(f"Unexpected error: {e}")
     finally:
         loop.close()
         sys.exit()
-
 
 if __name__ == "__main__":
     main()
