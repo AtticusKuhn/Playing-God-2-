@@ -2,6 +2,7 @@ import asyncio
 from typing import Set, Tuple, Optional, Callable
 import pygame
 
+
 class BackgroundLoader:
     def __init__(self):
         self.loading_queue: Set[Tuple[int, int, int]] = set()
@@ -31,8 +32,7 @@ class BackgroundLoader:
         """Ensure the background loader is running."""
         if self.loading_task is None or self.loading_task.done():
             self.loading_task = asyncio.run_coroutine_threadsafe(
-                self.background_loader(),
-                loop
+                self.background_loader(), loop
             )
 
     def set_fetch_callback(self, callback: Callable):

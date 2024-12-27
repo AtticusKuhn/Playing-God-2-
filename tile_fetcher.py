@@ -3,6 +3,7 @@ import time
 from typing import Optional, List
 import pygame
 
+
 class TileFetcher:
     def __init__(self, max_requests_per_second: int = 2):
         self.session: Optional[aiohttp.ClientSession] = None
@@ -12,10 +13,12 @@ class TileFetcher:
     async def get_session(self) -> aiohttp.ClientSession:
         """Get or create an aiohttp session."""
         if self.session is None or self.session.closed:
-            self.session = aiohttp.ClientSession(headers={
-                'User-Agent': 'Python Game Version 1',
-                'From': 'atticusmkuhn@gmail.com'
-            })
+            self.session = aiohttp.ClientSession(
+                headers={
+                    "User-Agent": "Python Game Version 1",
+                    "From": "atticusmkuhn@gmail.com",
+                }
+            )
         return self.session
 
     def is_rate_limited(self) -> bool:

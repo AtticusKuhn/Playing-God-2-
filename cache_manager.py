@@ -2,10 +2,11 @@ import pygame
 from pathlib import Path
 from typing import Dict, Tuple, Optional
 
+
 class CacheManager:
     def __init__(self):
         self.memory_cache: Dict[Tuple[int, int, int], pygame.Surface] = {}
-        self.disk_cache_dir = Path.home() / '.map_cache'
+        self.disk_cache_dir = Path.home() / ".map_cache"
         self.disk_cache_dir.mkdir(exist_ok=True)
 
     def get_cache_path(self, x: int, y: int, zoom: int) -> Path:
@@ -28,16 +29,19 @@ class CacheManager:
                 print(f"Error loading cached tile: {e}")
         return None
 
-    def save_to_cache(self, x: int, y: int, zoom: int, data: bytes) -> Optional[pygame.Surface]:
+    def save_to_cache(
+        self, x: int, y: int, zoom: int, data: bytes
+    ) -> Optional[pygame.Surface]:
         """Save tile data to both disk and memory cache."""
         try:
             # Save to disk cache
             cache_path = self.get_cache_path(x, y, zoom)
-            with open(cache_path, 'wb') as f:
+            with open(cache_path, "wb") as f:
                 f.write(data)
-            
+
             # Load into pygame and save to memory cache
             from io import BytesIO
+
             surface = pygame.image.load(BytesIO(data))
             self.memory_cache[(x, y, zoom)] = surface
             return surface

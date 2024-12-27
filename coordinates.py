@@ -1,13 +1,16 @@
 from pyproj import Transformer
 
+
 class CoordinateManager:
     def __init__(self):
         # Initialize projection transformer (Web Mercator to/from WGS84)
-        self.transformer = Transformer.from_crs("EPSG:4326", "EPSG:3857", always_xy=True)
-        
+        self.transformer = Transformer.from_crs(
+            "EPSG:4326", "EPSG:3857", always_xy=True
+        )
+
     def lat_lon_to_pixel(self, lat, lon, zoom, tile_size):
         """Convert latitude/longitude to pixel coordinates at a given zoom level"""
-        n = 2.0 ** zoom
+        n = 2.0**zoom
         x, y = self.transformer.transform(lon, lat)
         tile_x = (x + 20037508.34) / (40075016.68 / n)
         tile_y = (-y + 20037508.34) / (40075016.68 / n)
