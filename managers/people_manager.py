@@ -8,6 +8,7 @@ from models.prayer import Prayer
 class PeopleManager:
     # Custom event for prayer inbox updates
     PRAYER_RECEIVED_EVENT = pygame.USEREVENT + 2
+
     def __init__(self, map_width: float = 10000, map_height: float = 10000):
         self.people: List[Person] = []
         self.map_width = map_width
@@ -65,11 +66,10 @@ class PeopleManager:
                     # Post event for new prayer
                     pygame.event.post(
                         pygame.event.Event(
-                            self.PRAYER_RECEIVED_EVENT,
-                            {"prayer_id": prayer_id}
+                            self.PRAYER_RECEIVED_EVENT, {"prayer_id": prayer_id}
                         )
                     )
-            
+
             # If person has no target, set a new random target
             if not person.move_target:
                 person.set_random_target(self.map_width, self.map_height)

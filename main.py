@@ -1,14 +1,15 @@
 """Main game module."""
+
 import sys
 import asyncio
 import pygame
-from typing import Optional
 
 from config import WindowConfig
 from map_manager import MapManager
 from managers.people_manager import PeopleManager
 from managers.camera_manager import CameraManager
 from ui.prayer_ui import PrayerUI
+
 
 class Game:
     """Main game class managing the game loop and components."""
@@ -19,9 +20,11 @@ class Game:
             # Initialize Pygame
             if not pygame.get_init():
                 pygame.init()
-                
+
             # Set up display
-            self.screen = pygame.display.set_mode((WindowConfig.WIDTH, WindowConfig.HEIGHT))
+            self.screen = pygame.display.set_mode(
+                (WindowConfig.WIDTH, WindowConfig.HEIGHT)
+            )
             pygame.display.set_caption(WindowConfig.TITLE)
             self.clock = pygame.time.Clock()
 
@@ -29,8 +32,7 @@ class Game:
             self.camera = CameraManager()
             self.map_manager = MapManager(WindowConfig.WIDTH, WindowConfig.HEIGHT)
             self.people_manager = PeopleManager(
-                map_width=WindowConfig.HEIGHT,
-                map_height=WindowConfig.HEIGHT
+                map_width=WindowConfig.HEIGHT, map_height=WindowConfig.HEIGHT
             )
             self.prayer_ui = PrayerUI()
 
@@ -43,7 +45,7 @@ class Game:
 
     def handle_input(self) -> bool:
         """Handle input events.
-        
+
         Returns:
             bool: False if the game should exit, True otherwise
         """
@@ -64,7 +66,9 @@ class Game:
             self.people_manager.handle_event(event)
 
             # Handle prayer UI input
-            if prayer_response := self.prayer_ui.handle_input(event, self.people_manager.active_prayers):
+            if prayer_response := self.prayer_ui.handle_input(
+                event, self.people_manager.active_prayers
+            ):
                 prayer_id, response_type = prayer_response
                 self.people_manager.answer_prayer(prayer_id, response_type)
                 self.prayer_ui.selected_prayer_id = None
@@ -128,6 +132,7 @@ class Game:
         except Exception as e:
             print(f"Error during cleanup: {e}")
 
+
 def main() -> None:
     """Entry point for the game."""
     # Set up the event loop policy for Windows
@@ -148,6 +153,7 @@ def main() -> None:
     finally:
         loop.close()
         sys.exit()
+
 
 if __name__ == "__main__":
     main()

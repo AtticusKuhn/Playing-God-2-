@@ -1,6 +1,5 @@
 { pkgs ? import <nixpkgs-unstable> {} }:
 with pkgs;let
-  xdsl = ps: ps.callPackage ./xdsl.nix {};
   my-python-packages = ps: with ps; [
     pygame
     requests
