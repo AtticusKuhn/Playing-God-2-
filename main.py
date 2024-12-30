@@ -73,7 +73,6 @@ class Game:
             )
             if clicked_person is not None:
                 self.person_ui.show_person(clicked_person)
-            print(f"clicked_person: {clicked_person}")
             # Handle person UI input
             self.person_ui.handle_input(event)
 

@@ -6,6 +6,8 @@ with pkgs;let
     pyproj
     aiohttp
     aiofiles
+    openai
+    python-dotenv
   ];
   my-python = pkgs.python3.withPackages my-python-packages;
 in

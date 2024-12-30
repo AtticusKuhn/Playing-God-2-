@@ -42,7 +42,7 @@ class PersonAttributes:
 
     def can_pray(self) -> bool:
         """Determine if enough time has passed for a new prayer"""
-        if random.random() > 0.001 or self.last_prayer_time is None:
+        if random.random() > 0.001 and self.last_prayer_time is None:
         # if self.last_prayer_time is None:
             return True
 

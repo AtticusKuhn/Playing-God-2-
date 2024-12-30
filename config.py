@@ -1,6 +1,18 @@
 """Game configuration constants."""
 
+import os
 from dataclasses import dataclass
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
+
+
+@dataclass
+class OpenAIConfig:
+    """OpenAI-related configuration."""
+    
+    API_KEY: str = os.getenv('OPENAI_API_KEY')
 
 
 @dataclass
@@ -10,7 +22,7 @@ class WindowConfig:
     WIDTH: int = 1024
     HEIGHT: int = 768
     TITLE: str = "Playing God Game"
-    FPS: int = 60
+    FPS: int = 20
 
 
 @dataclass
