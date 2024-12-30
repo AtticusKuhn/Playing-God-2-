@@ -4,7 +4,6 @@ import math
 from typing import List
 from .person_attributes import PersonAttributes
 from .prayer import Prayer
-from typing import List
 
 
 class Person:
@@ -20,8 +19,7 @@ class Person:
         self.move_target = None
         # Initialize attributes with random name and age
         self.attributes = PersonAttributes(
-            name=self._generate_random_name(),
-            age=random.randint(18, 80)
+            name=self._generate_random_name(), age=random.randint(18, 80)
         )
         self.default_color = (255, 0, 0)  # Store default color
 
@@ -94,14 +92,48 @@ class Person:
     def _generate_random_name(self) -> str:
         """Generate a random name for the person"""
         first_names = [
-            "John", "Mary", "James", "Sarah", "Michael", "Emma", "David", "Anna",
-            "Robert", "Lisa", "William", "Emily", "Joseph", "Sofia", "Thomas",
-            "Olivia", "Daniel", "Isabella", "Matthew", "Ava"
+            "John",
+            "Mary",
+            "James",
+            "Sarah",
+            "Michael",
+            "Emma",
+            "David",
+            "Anna",
+            "Robert",
+            "Lisa",
+            "William",
+            "Emily",
+            "Joseph",
+            "Sofia",
+            "Thomas",
+            "Olivia",
+            "Daniel",
+            "Isabella",
+            "Matthew",
+            "Ava",
         ]
         last_names = [
-            "Smith", "Johnson", "Williams", "Brown", "Jones", "Garcia", "Miller",
-            "Davis", "Rodriguez", "Martinez", "Hernandez", "Lopez", "Gonzalez",
-            "Wilson", "Anderson", "Thomas", "Taylor", "Moore", "Jackson", "Martin"
+            "Smith",
+            "Johnson",
+            "Williams",
+            "Brown",
+            "Jones",
+            "Garcia",
+            "Miller",
+            "Davis",
+            "Rodriguez",
+            "Martinez",
+            "Hernandez",
+            "Lopez",
+            "Gonzalez",
+            "Wilson",
+            "Anderson",
+            "Thomas",
+            "Taylor",
+            "Moore",
+            "Jackson",
+            "Martin",
         ]
         return f"{random.choice(first_names)} {random.choice(last_names)}"
 

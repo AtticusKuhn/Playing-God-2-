@@ -1,7 +1,7 @@
 import pygame
 import random
 import math
-from typing import List, Optional, Dict, Tuple
+from typing import List, Optional, Dict
 from models.person import Person
 from models.prayer import Prayer
 
@@ -30,19 +30,21 @@ class PeopleManager:
             # Set initial movement target
             person.set_random_target(self.map_width, self.map_height)
 
-    def handle_event(self, event: pygame.event.Event, view_x: float, view_y: float, zoom_level: float) -> Optional[Person]:
+    def handle_event(
+        self, event: pygame.event.Event, view_x: float, view_y: float, zoom_level: float
+    ) -> Optional[Person]:
         """Handle pygame events. Returns clicked person if any."""
         clicked_person = None
-        
+
         # Check for clicks that might select a person
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:  # Left click
             mouse_x, mouse_y = pygame.mouse.get_pos()
             # Convert screen coordinates to world coordinates
             world_x = (mouse_x / zoom_level) + view_x
             world_y = (mouse_y / zoom_level) + view_y
-            
+
             # Find closest person within click radius
-            min_dist = float('inf')
+            min_dist = float("inf")
             for person in self.people:
                 dx = person.x - world_x
                 dy = person.y - world_y
@@ -54,7 +56,7 @@ class PeopleManager:
         # Forward events to all people
         for person in self.people:
             person.handle_event(event)
-            
+
         return clicked_person
 
     def get_prayer(self, prayer_id: int) -> Optional[tuple[Person, Prayer]]:

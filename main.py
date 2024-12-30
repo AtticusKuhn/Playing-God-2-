@@ -66,12 +66,14 @@ class Game:
 
             # Get camera transform for click detection
             view_x, view_y, zoom = self.camera.get_transform_params()
-            
+
             # Forward events to people manager and check for clicked person
-            clicked_person = self.people_manager.handle_event(event, view_x, view_y, zoom)
+            clicked_person = self.people_manager.handle_event(
+                event, view_x, view_y, zoom
+            )
             if clicked_person is not None:
                 self.person_ui.show_person(clicked_person)
-            print(f"clicked_person: {clicked_person}") 
+            print(f"clicked_person: {clicked_person}")
             # Handle person UI input
             self.person_ui.handle_input(event)
 
