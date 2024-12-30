@@ -61,8 +61,8 @@ class Person:
             self.color = (255, 165, 0)  # Orange for denied prayers
         # Delayed prayers don't affect faith
 
-        # Reset color after 1 second
-        pygame.time.set_timer(self.RESET_PRAYER_COLOR_EVENT, 1000, loops=1)
+        # Reset color after 3 second
+        pygame.time.set_timer(self.RESET_PRAYER_COLOR_EVENT, 3000, loops=1)
 
     def update(self, delta_time: float) -> None:
         """Update person's position and generate prayers"""
