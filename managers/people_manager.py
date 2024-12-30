@@ -63,14 +63,15 @@ class PeopleManager:
         """Get a prayer and its person by ID"""
         return self.active_prayers.get(prayer_id)
 
-    def answer_prayer(self, prayer_id: int, response_type: str):
-        """Answer a prayer with accept/deny/delay"""
+    def answer_prayer(self, prayer_id: int, response_type: str, response=None):
+        """Answer a prayer with accept/deny/delay/custom"""
         if prayer_pair := self.active_prayers.get(prayer_id):
             person, prayer = prayer_pair
-            person.handle_prayer_response(prayer, response_type)
+            person.handle_prayer_response(prayer, response_type, response)
             # Remove from active prayers if not delayed
             if response_type != "delayed":
                 del self.active_prayers[prayer_id]
+            
 
     def update(self):
         """Update all people and manage prayers"""

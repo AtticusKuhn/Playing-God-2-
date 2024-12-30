@@ -1,5 +1,5 @@
-pygame==2.5.2
-requests==2.31.0
-pyproj==3.6.1
-aiohttp==3.9.1
-aiofiles==23.2.1
+pygame
+requests
+pyproj
+aiohttp
+aiofiles

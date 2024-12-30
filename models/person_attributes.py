@@ -1,8 +1,11 @@
 from dataclasses import dataclass, field
-from typing import List, Optional
+from typing import List, Optional, Tuple
 from datetime import datetime, timedelta
 from .prayer import Prayer
 import random
+from openai import OpenAI
+import os
+import threading
 
 
 @dataclass
@@ -23,9 +26,24 @@ class PersonAttributes:
     emotional_state: float = 0.5  # 0.0 (distressed) to 1.0 (joyful)
     life_satisfaction: float = 0.5  # 0.0 (unsatisfied) to 1.0 (satisfied)
 
+    walking_speed: float = field(init=False)
+
+    lock: threading.Lock = threading.Lock()  # Class-level (static) lock for API calls
+
+    client = OpenAI()
+    # Prompt GPT to identify relevant topics
+    
+    life_record: List[Tuple[str, str]] = field(default_factory=list) # List of life events (time/date, description)
+
+    first_person: bool = True # TODO: Set to False (just for testing)
+    def __post_init__(self):
+        assert self.age >= 18, "Age must be 18 or older"
+        self.walking_speed = 20 * (18 / self.age)
+
     def can_pray(self) -> bool:
         """Determine if enough time has passed for a new prayer"""
-        if self.last_prayer_time is None:
+        if random.random() > 0.001 or self.last_prayer_time is None:
+        # if self.last_prayer_time is None:
             return True
 
         # Base time between prayers (in hours) is influenced by prayer_frequency
@@ -50,19 +68,49 @@ class PersonAttributes:
         # Simple prayer content generation (placeholder for more complex generation)
         content = self._generate_prayer_content()
 
-        prayer = Prayer(content=content, timestamp=datetime.now(), urgency=urgency)
-
+        prayer = Prayer(content=content, urgency=urgency)
+        # if prayer.content != "Hey":
+        #     self.prayers.append(prayer)
         self.prayers.append(prayer)
         self.last_prayer_time = prayer.timestamp
         return prayer
 
     def _generate_prayer_content(self) -> str:
-        """Generate prayer content based on current state"""
-        if self.emotional_state < 0.3:
-            return "Please help me in these difficult times."
-        elif self.life_satisfaction < 0.3:
-            return "I seek your guidance to improve my life."
-        elif random.random() < self.faith:
-            return "Thank you for your blessings."
-        else:
-            return "Please watch over me and my loved ones."
+        """Generate prayer content using GPT's API based on current state"""
+        with PersonAttributes.lock:
+            if PersonAttributes.first_person:
+                return "Hey"
+                # """Generate prayer content based on current state"""
+                # if self.emotional_state < 0.3:
+                #     return "Please help me in these difficult times."
+                # elif self.life_satisfaction < 0.3:
+                #     return "I seek your guidance to improve my life."
+                # elif random.random() < self.faith:
+                #     return "Thank you for your blessings."
+                # else:
+                #     return "Please watch over me and my loved ones."
+            PersonAttributes.first_person = True
+        prompt = (
+            "Generate a prayer to God for a person with the following attributes:\n"
+            f"Name: {self.name}\n"
+            f"Age: {self.age}\n"
+            f"Emotional state: {self.emotional_state}\n"
+            f"Life satisfaction: {self.life_satisfaction}\n"
+            f"Faith: {self.faith}\n"
+        )
+        print("Generating prayer content")
+        print(prompt)
+        response = PersonAttributes.client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {"role": "system", "content": "You are a helpful assistant."},
+                {"role": "user", "content": prompt}
+            ],
+            max_tokens=40,
+            n=1,
+            stop=None,
+            temperature=0.7,
+        )
+        print(response.choices)
+        prayer_content = response.choices[0].message.content.strip()
+        return prayer_content

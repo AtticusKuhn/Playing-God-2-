@@ -1,7 +1,7 @@
 import pygame
 import random
 import math
-from typing import List
+from typing import List, Optional
 from .person_attributes import PersonAttributes
 from .prayer import Prayer
 
@@ -10,17 +10,17 @@ class Person:
     # Custom event for resetting prayer color
     RESET_PRAYER_COLOR_EVENT = pygame.USEREVENT + 1
 
-    def __init__(self, x: float, y: float, radius: int = 10):
+    def __init__(self, x: float, y: float, radius: int = 4):
         self.x = x
         self.y = y
         self.radius = radius
         self.color = (255, 0, 0)  # Default red color
-        self.speed = 30
         self.move_target = None
         # Initialize attributes with random name and age
         self.attributes = PersonAttributes(
             name=self._generate_random_name(), age=random.randint(18, 80)
         )
+        self.speed = self.attributes.walking_speed
         self.default_color = (255, 0, 0)  # Store default color
 
     def set_random_target(
@@ -46,11 +46,11 @@ class Person:
 
     def get_active_prayers(self) -> List[Prayer]:
         """Get all unanswered prayers"""
-        return [p for p in self.attributes.prayers if not p.answered]
+        return [p for p in self.attributes.prayers if not p.was_answered]
 
-    def handle_prayer_response(self, prayer: Prayer, response_type: str) -> None:
+    def handle_prayer_response(self, prayer: Prayer, response_type: str, response: Optional[str]) -> None:
         """Handle a response to a prayer"""
-        prayer.answer(response_type)
+        prayer.answer(response_type, response)
 
         # Adjust faith based on response
         if response_type == "accepted":

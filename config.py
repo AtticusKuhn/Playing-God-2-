@@ -31,5 +31,5 @@ class UIConfig:
     PRAYER_PANEL_WIDTH: int = 300
     PRAYER_ITEM_HEIGHT: int = 70
     MAX_VISIBLE_PRAYERS: int = 5
-    FONT_SIZE: int = 24
+    FONT_SIZE: int = 15
     OVERLAY_ALPHA: int = 128

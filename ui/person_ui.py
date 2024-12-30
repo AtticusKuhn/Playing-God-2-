@@ -65,7 +65,7 @@ class PersonUI:
         y += 40
 
         # Spiritual attributes
-        self._draw_text(screen, "Faith:", y)
+        self._draw_text(screen, f"Faith: {attrs.faith}", y)
         y += 20
         faith_width = 180
         faith_rect = pygame.Rect(self.padding + 10, y, faith_width, 10)
@@ -75,7 +75,7 @@ class PersonUI:
         y += 40
 
         # Mental attributes
-        self._draw_text(screen, "Emotional State:", y)
+        self._draw_text(screen, f"Emotional State: {attrs.emotional_state}", y)
         y += 20
         emotion_rect = pygame.Rect(self.padding + 10, y, faith_width, 10)
         pygame.draw.rect(screen, (50, 50, 50), emotion_rect)
@@ -85,7 +85,7 @@ class PersonUI:
         pygame.draw.rect(screen, (0, 0, 255), emotion_fill)
         y += 30
 
-        self._draw_text(screen, "Life Satisfaction:", y)
+        self._draw_text(screen, f"Life Satisfaction: {attrs.life_satisfaction}", y)
         y += 20
         satisfaction_rect = pygame.Rect(self.padding + 10, y, faith_width, 10)
         pygame.draw.rect(screen, (50, 50, 50), satisfaction_rect)
