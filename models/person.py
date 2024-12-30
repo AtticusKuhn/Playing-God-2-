@@ -48,7 +48,9 @@ class Person:
         """Get all unanswered prayers"""
         return [p for p in self.attributes.prayers if not p.was_answered]
 
-    def handle_prayer_response(self, prayer: Prayer, response_type: str, response: Optional[str]) -> None:
+    def handle_prayer_response(
+        self, prayer: Prayer, response_type: str, response: Optional[str]
+    ) -> None:
         """Handle a response to a prayer"""
         prayer.answer(response_type, response)
 

@@ -142,7 +142,9 @@ class PrayerUI:
 
             # Draw prayer content
             text = self.font.render(
-                f"Prayer: {prayer.content[:30]}...\nFrom: {person.attributes.name}", True, (255, 255, 255)
+                f"Prayer: {prayer.content[:30]}...\nFrom: {person.attributes.name}",
+                True,
+                (255, 255, 255),
             )
             screen.blit(
                 text, (WindowConfig.WIDTH - UIConfig.PRAYER_PANEL_WIDTH + 10, y)

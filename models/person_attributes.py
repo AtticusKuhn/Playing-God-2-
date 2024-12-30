@@ -4,7 +4,6 @@ from datetime import datetime, timedelta
 from .prayer import Prayer
 import random
 from openai import OpenAI
-import os
 import threading
 
 
@@ -32,10 +31,13 @@ class PersonAttributes:
 
     client = OpenAI()
     # Prompt GPT to identify relevant topics
-    
-    life_record: List[Tuple[str, str]] = field(default_factory=list) # List of life events (time/date, description)
 
-    first_person: bool = True # TODO: Set to False (just for testing)
+    life_record: List[Tuple[str, str]] = field(
+        default_factory=list
+    )  # List of life events (time/date, description)
+
+    first_person: bool = True  # TODO: Set to False (just for testing)
+
     def __post_init__(self):
         assert self.age >= 18, "Age must be 18 or older"
         self.walking_speed = 20 * (18 / self.age)
@@ -103,7 +105,7 @@ class PersonAttributes:
             model="gpt-4o-mini",
             messages=[
                 {"role": "system", "content": "You are a helpful assistant."},
-                {"role": "user", "content": prompt}
+                {"role": "user", "content": prompt},
             ],
             max_tokens=40,
             n=1,

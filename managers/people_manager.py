@@ -71,7 +71,6 @@ class PeopleManager:
             # Remove from active prayers if not delayed
             if response_type != "delayed":
                 del self.active_prayers[prayer_id]
-            
 
     def update(self):
         """Update all people and manage prayers"""

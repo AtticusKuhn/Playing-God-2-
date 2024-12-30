@@ -11,8 +11,8 @@ load_dotenv()
 @dataclass
 class OpenAIConfig:
     """OpenAI-related configuration."""
-    
-    API_KEY: str = os.getenv('OPENAI_API_KEY')
+
+    API_KEY: str = os.getenv("OPENAI_API_KEY")
 
 
 @dataclass
