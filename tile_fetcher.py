@@ -28,7 +28,7 @@ class TileFetcher:
 
     async def fetch_tile_data(self, url: str) -> Optional[bytes]:
         """Fetch tile data from the given URL."""
-        print(f"fetching {url}")
+        # print(f"fetching {url}")
         try:
             session = await self.get_session()
             async with session.get(url) as response:

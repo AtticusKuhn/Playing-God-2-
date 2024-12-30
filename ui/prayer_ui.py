@@ -12,10 +12,11 @@ class PrayerUI:
 
     def __init__(self):
         """Initialize the prayer UI component."""
-        self.visible = False
+        self.visible = True
         self.selected_prayer_id: Optional[int] = None
         self.scroll_position = 0
         self.font = pygame.font.Font(None, UIConfig.FONT_SIZE)
+        self.hovered_prayer_id: Optional[int] = None
 
         # Create the overlay surface once
         self.overlay = pygame.Surface(
@@ -48,13 +49,51 @@ class PrayerUI:
             )
             return None
 
+        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:  # Left click
+            mouse_x, mouse_y = pygame.mouse.get_pos()
+            if (
+                WindowConfig.WIDTH - UIConfig.PRAYER_PANEL_WIDTH
+                <= mouse_x
+                <= WindowConfig.WIDTH
+            ):
+                # Calculate which prayer was clicked
+                y = 10
+                visible_prayers = list(active_prayers.items())[self.scroll_position :]
+                for prayer_id, _ in visible_prayers:
+                    if y <= mouse_y <= y + UIConfig.PRAYER_ITEM_HEIGHT:
+                        self.selected_prayer_id = prayer_id
+                        break
+                    y += UIConfig.PRAYER_ITEM_HEIGHT
+
+        if event.type == pygame.MOUSEMOTION:
+            mouse_x, mouse_y = pygame.mouse.get_pos()
+            self.hovered_prayer_id = None
+            if (
+                WindowConfig.WIDTH - UIConfig.PRAYER_PANEL_WIDTH
+                <= mouse_x
+                <= WindowConfig.WIDTH
+            ):
+                # Calculate which prayer is being hovered
+                y = 10
+                visible_prayers = list(active_prayers.items())[self.scroll_position :]
+                for prayer_id, _ in visible_prayers:
+                    if y <= mouse_y <= y + UIConfig.PRAYER_ITEM_HEIGHT:
+                        self.hovered_prayer_id = prayer_id
+                        break
+                    y += UIConfig.PRAYER_ITEM_HEIGHT
+
         if event.type == pygame.KEYDOWN and self.selected_prayer_id is not None:
+            response = None
             if event.key == pygame.K_y:
-                return (self.selected_prayer_id, "accepted")
+                response = (self.selected_prayer_id, "accepted")
             elif event.key == pygame.K_n:
-                return (self.selected_prayer_id, "denied")
+                response = (self.selected_prayer_id, "denied")
             elif event.key == pygame.K_d:
-                return (self.selected_prayer_id, "delayed")
+                response = (self.selected_prayer_id, "delayed")
+
+            if response:
+                self.selected_prayer_id = None  # Clear selection after answering
+                return response
 
         return None
 
@@ -81,11 +120,18 @@ class PrayerUI:
             if y > WindowConfig.HEIGHT - 60:  # Leave space for controls
                 break
 
-            # Highlight selected prayer
+            # Highlight selected or hovered prayer
             if prayer_id == self.selected_prayer_id:
+                highlight_color = (100, 100, 100)
+            elif prayer_id == self.hovered_prayer_id:
+                highlight_color = (50, 50, 50)
+            else:
+                highlight_color = None
+
+            if highlight_color:
                 pygame.draw.rect(
                     screen,
-                    (100, 100, 100),
+                    highlight_color,
                     (
                         WindowConfig.WIDTH - UIConfig.PRAYER_PANEL_WIDTH + 5,
                         y - 5,

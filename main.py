@@ -9,6 +9,7 @@ from map_manager import MapManager
 from managers.people_manager import PeopleManager
 from managers.camera_manager import CameraManager
 from ui.prayer_ui import PrayerUI
+from ui.person_ui import PersonUI
 
 
 class Game:
@@ -35,6 +36,7 @@ class Game:
                 map_width=WindowConfig.HEIGHT, map_height=WindowConfig.HEIGHT
             )
             self.prayer_ui = PrayerUI()
+            self.person_ui = PersonUI()
 
             # Add initial population
             self.people_manager.add_random_people(100)
@@ -62,8 +64,16 @@ class Game:
             elif event.type == pygame.KEYDOWN and event.key == pygame.K_TAB:
                 self.prayer_ui.toggle_visibility()
 
-            # Forward events to people manager
-            self.people_manager.handle_event(event)
+            # Get camera transform for click detection
+            view_x, view_y, zoom = self.camera.get_transform_params()
+            
+            # Forward events to people manager and check for clicked person
+            clicked_person = self.people_manager.handle_event(event, view_x, view_y, zoom)
+            if clicked_person is not None:
+                self.person_ui.show_person(clicked_person)
+            print(f"clicked_person: {clicked_person}") 
+            # Handle person UI input
+            self.person_ui.handle_input(event)
 
             # Handle prayer UI input
             if prayer_response := self.prayer_ui.handle_input(
@@ -101,6 +111,7 @@ class Game:
             self.map_manager.draw(self.screen)
             self.people_manager.draw(self.screen, view_x, view_y, zoom)
             self.prayer_ui.draw(self.screen, self.people_manager.active_prayers)
+            self.person_ui.draw(self.screen)
 
             # Update display
             pygame.display.flip()
