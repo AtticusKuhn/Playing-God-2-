@@ -100,7 +100,7 @@ class Game:
             # Update viewport with latest camera transform
             view_x, view_y, zoom = self.camera.get_transform_params()
             self.viewport.update(view_x, view_y, zoom)
-            self.map_manager.update()
+            self.map_manager.update(self.viewport)
             self.people_manager.update()
         except Exception as e:
             print(f"Error updating game state: {e}")
@@ -115,7 +115,7 @@ class Game:
             self.map_manager.draw(self.screen, self.viewport)
             self.people_manager.draw(self.screen)
             self.prayer_ui.draw(self.screen, self.people_manager.active_prayers)
-            self.person_ui.draw(self.screen)
+            # self.person_ui.draw(self.screen)
 
             # Update display
             pygame.display.flip()

@@ -145,10 +145,10 @@ class Person:
         # if viewport.is_in_viewport(self.x, self.y):
             # Get screen coordinates
         screen_x, screen_y = viewport.world_to_screen(self.x, self.y)
-        # Draw circle
+            # Draw circle
         pygame.draw.circle(
             screen, 
             self.color, 
-            ((screen_x), (screen_y)), 
-            (self.radius * viewport.state.zoom)
+            (int(screen_x), int(screen_y)), 
+            int(self.radius * viewport.state.zoom)
         )

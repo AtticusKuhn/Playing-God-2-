@@ -7,7 +7,7 @@ from cache_manager import CacheManager
 from tile_fetcher import TileFetcher
 from tile_renderer import TileRenderer
 from background_loader import BackgroundLoader
-
+from managers.viewport_manager import ViewportManager
 
 class MapManager:
     def __init__(self, window_width: int, window_height: int):
@@ -61,13 +61,13 @@ class MapManager:
             return self.cache_manager.save_to_cache(x, y, zoom, data)
         return None
 
-    def update(self):
+    def update(self, viewport: ViewportManager):
         """Update map state based on viewport"""
         # self.viewport = viewport
         # Convert game zoom level (0.5-5.0) to a smoother OSM zoom level (1-8)
         # self.zoom_level = max(1.0, min(8.0, 1.0 + (self.viewport.state.zoom - 0.5) * (7.0 / 4.5)))
         # Calculate the base OSM zoom level for tile fetching
-        # self.tile_zoom = int(self.zoom_level)
+        self.tile_zoom = int(viewport.state.zoom)
         pass
 
     def draw(self, screen: pygame.Surface, viewport):
