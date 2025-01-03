@@ -26,6 +26,7 @@ class PeopleManager:
             person = Person(
                 x=random.uniform(0, self.map_width),
                 y=random.uniform(0, self.map_height),
+                radius = 6
             )
             self.people.append(person)
             # Set initial movement target

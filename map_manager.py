@@ -17,6 +17,7 @@ class MapManager:
         self.tile_fetcher = TileFetcher()
         self.tile_renderer = TileRenderer(window_width, window_height)
         self.background_loader = BackgroundLoader()
+        # self.viewport = viewport
 
         # Window properties
         self.window_width = window_width
@@ -29,7 +30,7 @@ class MapManager:
         # self.zoom_level = 2  # Initial zoom level
         # self.view_x = 0
         # self.view_y = 0
-        # self.tile_zoom = 2
+        self.tile_zoom = 2
 
         # Async setup
         self.loop = asyncio.get_event_loop()
@@ -60,19 +61,20 @@ class MapManager:
             return self.cache_manager.save_to_cache(x, y, zoom, data)
         return None
 
-    def update(self, viewport):
+    def update(self):
         """Update map state based on viewport"""
-        self.viewport = viewport
+        # self.viewport = viewport
         # Convert game zoom level (0.5-5.0) to a smoother OSM zoom level (1-8)
-        self.zoom_level = max(1.0, min(8.0, 1.0 + (viewport.state.zoom - 0.5) * (7.0 / 4.5)))
+        # self.zoom_level = max(1.0, min(8.0, 1.0 + (self.viewport.state.zoom - 0.5) * (7.0 / 4.5)))
         # Calculate the base OSM zoom level for tile fetching
-        self.tile_zoom = int(self.zoom_level)
+        # self.tile_zoom = int(self.zoom_level)
+        pass
 
-    def draw(self, screen: pygame.Surface):
+    def draw(self, screen: pygame.Surface, viewport):
         """Draw visible map tiles to the screen"""
         # Calculate visible tiles and their scaled size
         visible_tiles, tile_size_scaled = self.tile_renderer.calculate_visible_tiles(
-            self.viewport, self.tile_zoom
+            viewport, self.tile_zoom
         )
 
         # Ensure background loader is running
@@ -92,7 +94,7 @@ class MapManager:
 
             # Draw cached tile
             position = self.tile_renderer.get_screen_position(
-                x, y, tile_size_scaled, self.viewport
+                x, y, tile_size_scaled, viewport
             )
             self.tile_renderer.render_tile(screen, tile, position, tile_size_scaled)
 
