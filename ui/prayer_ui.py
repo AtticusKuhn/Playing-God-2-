@@ -99,7 +99,6 @@ class PrayerUI:
 
     def show_prayer(self, prayer_id: int) -> None:
         """Show a specific prayer."""
-        self.visible = True
         self.selected_prayer_id = prayer_id
 
     def draw(
