@@ -10,10 +10,11 @@ class PeopleManager:
     # Custom event for prayer inbox updates
     PRAYER_RECEIVED_EVENT = pygame.USEREVENT + 2
 
-    def __init__(self, map_width: float = 10000, map_height: float = 10000):
+    def __init__(self, map_width: float = 10000, map_height: float = 10000, viewport=None):
         self.people: List[Person] = []
         self.map_width = map_width
         self.map_height = map_height
+        self.viewport = viewport
         self.last_update = pygame.time.get_ticks()
         # Track all active prayers for easy access
         self.active_prayers: Dict[int, tuple[Person, Prayer]] = {}
@@ -30,9 +31,7 @@ class PeopleManager:
             # Set initial movement target
             person.set_random_target(self.map_width, self.map_height)
 
-    def handle_event(
-        self, event: pygame.event.Event, view_x: float, view_y: float, zoom_level: float
-    ) -> Optional[Person]:
+    def handle_event(self, event: pygame.event.Event) -> Optional[Person]:
         """Handle pygame events. Returns clicked person if any."""
         clicked_person = None
 
@@ -40,16 +39,16 @@ class PeopleManager:
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:  # Left click
             mouse_x, mouse_y = pygame.mouse.get_pos()
             # Convert screen coordinates to world coordinates
-            world_x = (mouse_x / zoom_level) + view_x
-            world_y = (mouse_y / zoom_level) + view_y
+            world_x, world_y = self.viewport.screen_to_world(mouse_x, mouse_y)
 
             # Find closest person within click radius
             min_dist = float("inf")
+            click_radius = 10 / self.viewport.state.zoom  # Adjust click radius based on zoom
             for person in self.people:
                 dx = person.x - world_x
                 dy = person.y - world_y
                 dist = math.sqrt(dx * dx + dy * dy)
-                if dist < min_dist:
+                if dist < click_radius and dist < min_dist:
                     min_dist = dist
                     clicked_person = person
 
@@ -98,9 +97,7 @@ class PeopleManager:
             if not person.move_target:
                 person.set_random_target(self.map_width, self.map_height)
 
-    def draw(
-        self, screen: pygame.Surface, view_x: float, view_y: float, zoom_level: float
-    ):
+    def draw(self, screen: pygame.Surface):
         """Draw all people"""
         for person in self.people:
-            person.draw(screen, view_x, view_y, zoom_level)
+            person.draw(screen, self.viewport)

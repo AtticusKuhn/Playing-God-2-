@@ -10,17 +10,21 @@ class TileRenderer:
         self.tile_size = tile_size
 
     def calculate_visible_tiles(
-        self, view_x: float, view_y: float, zoom_level: float, tile_zoom: int
+        self, viewport, tile_zoom: int
     ) -> Tuple[List[Tuple[int, int, int]], float]:
         """Calculate which tiles are visible and need to be rendered."""
-        # Calculate scaled tile size using the floating-point zoom level for smoother scaling
-        tile_size_scaled = self.tile_size * (2 ** (zoom_level - tile_zoom))
+        # Use unscaled tile size for world coordinate calculations
+        # Get viewport bounds in world coordinates
+        left, top, right, bottom = viewport.get_visible_bounds()
 
         # Calculate the visible area bounds in tile coordinates
-        start_x = math.floor(view_x / tile_size_scaled)
-        start_y = math.floor(view_y / tile_size_scaled)
-        end_x = math.ceil((view_x + self.window_width) / tile_size_scaled)
-        end_y = math.ceil((view_y + self.window_height) / tile_size_scaled)
+        start_x = math.floor(left / self.tile_size)
+        start_y = math.floor(top / self.tile_size)
+        end_x = math.ceil(right / self.tile_size)
+        end_y = math.ceil(bottom / self.tile_size)
+
+        # Calculate scaled tile size for rendering
+        tile_size_scaled = self.tile_size * viewport.state.zoom
 
         # Add buffer tiles in each direction to handle partial visibility and smooth scrolling
         buffer = 2  # Number of extra tiles to load in each direction
@@ -42,13 +46,13 @@ class TileRenderer:
         tile_x: int,
         tile_y: int,
         tile_size_scaled: float,
-        view_x: float,
-        view_y: float,
+        viewport
     ) -> Tuple[float, float]:
         """Calculate the screen position for a tile."""
-        screen_x = (tile_x * tile_size_scaled) - view_x
-        screen_y = (tile_y * tile_size_scaled) - view_y
-        return screen_x, screen_y
+        # Use unscaled tile size for world coordinates
+        world_x = tile_x * self.tile_size
+        world_y = tile_y * self.tile_size
+        return viewport.world_to_screen(world_x, world_y)
 
     def scale_tile(
         self, tile: pygame.Surface, tile_size_scaled: float

@@ -24,12 +24,12 @@ class MapManager:
         self.tile_size = 256  # Standard OSM tile size
 
         # View state
-        self.base_lat = 51.5074  # London
-        self.base_lon = -0.1278
-        self.zoom_level = 2  # Initial zoom level
-        self.view_x = 0
-        self.view_y = 0
-        self.tile_zoom = 2
+        # self.base_lat = 51.5074  # London
+        # self.base_lon = -0.1278
+        # self.zoom_level = 2  # Initial zoom level
+        # self.view_x = 0
+        # self.view_y = 0
+        # self.tile_zoom = 2
 
         # Async setup
         self.loop = asyncio.get_event_loop()
@@ -60,12 +60,11 @@ class MapManager:
             return self.cache_manager.save_to_cache(x, y, zoom, data)
         return None
 
-    def update(self, view_x: float, view_y: float, zoom_level: float):
-        """Update map state based on view position and zoom"""
-        self.view_x = view_x
-        self.view_y = view_y
+    def update(self, viewport):
+        """Update map state based on viewport"""
+        self.viewport = viewport
         # Convert game zoom level (0.5-5.0) to a smoother OSM zoom level (1-8)
-        self.zoom_level = max(1.0, min(8.0, 1.0 + (zoom_level - 0.5) * (7.0 / 4.5)))
+        self.zoom_level = max(1.0, min(8.0, 1.0 + (viewport.state.zoom - 0.5) * (7.0 / 4.5)))
         # Calculate the base OSM zoom level for tile fetching
         self.tile_zoom = int(self.zoom_level)
 
@@ -73,7 +72,7 @@ class MapManager:
         """Draw visible map tiles to the screen"""
         # Calculate visible tiles and their scaled size
         visible_tiles, tile_size_scaled = self.tile_renderer.calculate_visible_tiles(
-            self.view_x, self.view_y, self.zoom_level, self.tile_zoom
+            self.viewport, self.tile_zoom
         )
 
         # Ensure background loader is running
@@ -93,7 +92,7 @@ class MapManager:
 
             # Draw cached tile
             position = self.tile_renderer.get_screen_position(
-                x, y, tile_size_scaled, self.view_x, self.view_y
+                x, y, tile_size_scaled, self.viewport
             )
             self.tile_renderer.render_tile(screen, tile, position, tile_size_scaled)
 
@@ -112,7 +111,7 @@ class MapManager:
                 for tile, (x, y, z) in zip(tiles, tiles_to_load):
                     if tile:
                         position = self.tile_renderer.get_screen_position(
-                            x, y, tile_size_scaled, self.view_x, self.view_y
+                            x, y, tile_size_scaled, self.viewport
                         )
                         self.tile_renderer.render_tile(
                             screen, tile, position, tile_size_scaled

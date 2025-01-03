@@ -10,6 +10,8 @@ from managers.people_manager import PeopleManager
 from managers.camera_manager import CameraManager
 from ui.prayer_ui import PrayerUI
 from ui.person_ui import PersonUI
+from coordinates import CoordinateManager
+from managers.viewport_manager import ViewportManager
 
 
 class Game:
@@ -31,9 +33,12 @@ class Game:
 
             # Initialize managers
             self.camera = CameraManager()
+            self.viewport = ViewportManager(WindowConfig.WIDTH, WindowConfig.HEIGHT)
             self.map_manager = MapManager(WindowConfig.WIDTH, WindowConfig.HEIGHT)
             self.people_manager = PeopleManager(
-                map_width=WindowConfig.HEIGHT, map_height=WindowConfig.HEIGHT
+                map_width=WindowConfig.HEIGHT,
+                map_height=WindowConfig.HEIGHT,
+                viewport=self.viewport
             )
             self.prayer_ui = PrayerUI()
             self.person_ui = PersonUI()
@@ -64,13 +69,12 @@ class Game:
             elif event.type == pygame.KEYDOWN and event.key == pygame.K_TAB:
                 self.prayer_ui.toggle_visibility()
 
-            # Get camera transform for click detection
+            # Update viewport with camera transform
             view_x, view_y, zoom = self.camera.get_transform_params()
+            self.viewport.update(view_x, view_y, zoom)
 
             # Forward events to people manager and check for clicked person
-            clicked_person = self.people_manager.handle_event(
-                event, view_x, view_y, zoom
-            )
+            clicked_person = self.people_manager.handle_event(event)
             if clicked_person is not None:
                 self.person_ui.show_person(clicked_person)
             # Handle person UI input
@@ -93,8 +97,10 @@ class Game:
     def update(self) -> None:
         """Update game state."""
         try:
+            # Update viewport with latest camera transform
             view_x, view_y, zoom = self.camera.get_transform_params()
-            self.map_manager.update(view_x, view_y, zoom)
+            self.viewport.update(view_x, view_y, zoom)
+            self.map_manager.update(self.viewport)
             self.people_manager.update()
         except Exception as e:
             print(f"Error updating game state: {e}")
@@ -105,12 +111,9 @@ class Game:
             # Clear screen
             self.screen.fill((0, 0, 255))
 
-            # Get current camera transform
-            view_x, view_y, zoom = self.camera.get_transform_params()
-
             # Draw game elements
             self.map_manager.draw(self.screen)
-            self.people_manager.draw(self.screen, view_x, view_y, zoom)
+            self.people_manager.draw(self.screen)
             self.prayer_ui.draw(self.screen, self.people_manager.active_prayers)
             self.person_ui.draw(self.screen)
 

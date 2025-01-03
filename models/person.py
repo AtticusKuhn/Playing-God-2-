@@ -139,16 +139,16 @@ class Person:
         ]
         return f"{random.choice(first_names)} {random.choice(last_names)}"
 
-    def draw(
-        self, screen: pygame.Surface, view_x: float, view_y: float, zoom_level: float
-    ):
+    def draw(self, screen: pygame.Surface, viewport):
         """Draw person on screen"""
-        # Calculate screen position
-        screen_x = (self.x - view_x) * zoom_level
-        screen_y = (self.y - view_y) * zoom_level
-
-        # Only draw if on screen
-        if 0 <= screen_x <= screen.get_width() and 0 <= screen_y <= screen.get_height():
+        # Only draw if in viewport
+        if viewport.is_in_viewport(self.x, self.y):
+            # Get screen coordinates
+            screen_x, screen_y = viewport.world_to_screen(self.x, self.y)
+            # Draw circle
             pygame.draw.circle(
-                screen, self.color, (int(screen_x), int(screen_y)), int(self.radius)
+                screen, 
+                self.color, 
+                (int(screen_x), int(screen_y)), 
+                int(self.radius * viewport.state.zoom)
             )
