@@ -44,8 +44,9 @@ class PersonAttributes:
 
     def can_pray(self) -> bool:
         """Determine if enough time has passed for a new prayer"""
-        if random.random() < 0.2 and self.last_prayer_time is None:
-            return True
+        # If no previous prayer, allow with 20% chance
+        if self.last_prayer_time is None:
+            return random.random() < 0.2
 
         # Base time between prayers (in hours) is influenced by prayer_frequency
         base_hours = 24 / self.prayer_frequency
@@ -55,6 +56,7 @@ class PersonAttributes:
         modifier = 2.0 - (self.emotional_state + self.faith) / 2
         required_hours = base_hours * modifier
 
+        # Calculate time since last prayer
         time_since_last = datetime.now() - self.last_prayer_time
         return time_since_last > timedelta(hours=required_hours)
 

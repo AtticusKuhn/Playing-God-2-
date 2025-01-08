@@ -10,7 +10,6 @@ from managers.people_manager import PeopleManager
 from managers.camera_manager import CameraManager
 from ui.prayer_ui import PrayerUI
 from ui.person_ui import PersonUI
-from coordinates import CoordinateManager
 from managers.viewport_manager import ViewportManager
 
 
@@ -38,7 +37,7 @@ class Game:
             self.people_manager = PeopleManager(
                 map_width=WindowConfig.HEIGHT,
                 map_height=WindowConfig.HEIGHT,
-                viewport=self.viewport
+                viewport=self.viewport,
             )
             self.prayer_ui = PrayerUI()
             self.person_ui = PersonUI()

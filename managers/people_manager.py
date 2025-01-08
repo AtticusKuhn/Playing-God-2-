@@ -10,7 +10,9 @@ class PeopleManager:
     # Custom event for prayer inbox updates
     PRAYER_RECEIVED_EVENT = pygame.USEREVENT + 2
 
-    def __init__(self, map_width: float = 10000, map_height: float = 10000, viewport=None):
+    def __init__(
+        self, map_width: float = 10000, map_height: float = 10000, viewport=None
+    ):
         self.people: List[Person] = []
         self.map_width = map_width
         self.map_height = map_height
@@ -26,7 +28,7 @@ class PeopleManager:
             person = Person(
                 x=random.uniform(0, self.map_width),
                 y=random.uniform(0, self.map_height),
-                radius = 6
+                radius=6,
             )
             self.people.append(person)
             # Set initial movement target
@@ -44,7 +46,9 @@ class PeopleManager:
 
             # Find closest person within click radius
             min_dist = float("inf")
-            click_radius = 10 / self.viewport.state.zoom  # Adjust click radius based on zoom
+            click_radius = (
+                10 / self.viewport.state.zoom
+            )  # Adjust click radius based on zoom
             for person in self.people:
                 dx = person.x - world_x
                 dy = person.y - world_y

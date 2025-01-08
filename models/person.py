@@ -143,12 +143,12 @@ class Person:
         """Draw person on screen"""
         # Only draw if in viewport
         # if viewport.is_in_viewport(self.x, self.y):
-            # Get screen coordinates
+        # Get screen coordinates
         screen_x, screen_y = viewport.world_to_screen(self.x, self.y)
-            # Draw circle
+        # Draw circle
         pygame.draw.circle(
-            screen, 
-            self.color, 
-            (int(screen_x), int(screen_y)), 
-            int(self.radius * viewport.state.zoom)
+            screen,
+            self.color,
+            (int(screen_x), int(screen_y)),
+            int(self.radius * viewport.state.zoom),
         )

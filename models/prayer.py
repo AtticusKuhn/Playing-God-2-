@@ -26,7 +26,7 @@ class Prayer:
     @property
     def age(self) -> float:
         """Returns the age of the prayer in seconds"""
-        return (datetime.now() - self.outgoing_message.timestamp).total_seconds()
+        return (datetime.now() - self.outgoing_prayer.timestamp).total_seconds()
 
     @property
     def was_answered(self) -> bool:
