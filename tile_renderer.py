@@ -1,26 +1,30 @@
 """Module for rendering map tiles in a scrollable viewport."""
-from dataclasses import dataclass
+
 from typing import Tuple, List, NamedTuple
 import pygame
 import math
+from managers.viewport_manager import ViewportManager
 
 
 class VisibleTileData(NamedTuple):
     """Data structure for visible tile information."""
+
     tiles: List[Tuple[int, int, int]]  # List of (x, y, zoom) tuples
     scaled_size: float  # Scaled size of tiles for rendering
 
 
 class TileRenderer:
     """Handles the rendering of map tiles based on viewport position and zoom level."""
-    
+
     # Number of extra tiles to load in each direction for smooth scrolling
     BUFFER_TILES: int = 2
     DEFAULT_TILE_SIZE: int = 256
 
-    def __init__(self, window_width: int, window_height: int, tile_size: int = DEFAULT_TILE_SIZE) -> None:
+    def __init__(
+        self, window_width: int, window_height: int, tile_size: int = DEFAULT_TILE_SIZE
+    ) -> None:
         """Initialize the tile renderer.
-        
+
         Args:
             window_width: Width of the game window in pixels
             window_height: Height of the game window in pixels
@@ -31,10 +35,10 @@ class TileRenderer:
         self.tile_size = tile_size
 
     def calculate_visible_tiles(
-        self, viewport: 'ViewportManager', tile_zoom: int
+        self, viewport: "ViewportManager", tile_zoom: int
     ) -> VisibleTileData:
         """Calculate which tiles are visible and need to be rendered.
-        
+
         Args:
             viewport: The viewport manager controlling the view
             tile_zoom: Current zoom level for tile detail
@@ -63,10 +67,14 @@ class TileRenderer:
         return VisibleTileData(visible_tiles, scaled_tile_size)
 
     def get_screen_position(
-        self, tile_x: int, tile_y: int, tile_size_scaled: float, viewport: 'ViewportManager'
+        self,
+        tile_x: int,
+        tile_y: int,
+        tile_size_scaled: float,
+        viewport: "ViewportManager",
     ) -> Tuple[float, float]:
         """Calculate the screen position for a tile.
-        
+
         Args:
             tile_x: Tile's x-coordinate
             tile_y: Tile's y-coordinate
@@ -85,7 +93,7 @@ class TileRenderer:
         self, tile: pygame.Surface, tile_size_scaled: float
     ) -> pygame.Surface:
         """Scale a tile surface to the appropriate size if needed.
-        
+
         Args:
             tile: The tile surface to scale
             tile_size_scaled: Target size for the tile
@@ -106,7 +114,7 @@ class TileRenderer:
         tile_size_scaled: float,
     ) -> None:
         """Render a single tile to the screen.
-        
+
         Args:
             screen: The surface to render the tile on
             tile: The tile surface to render

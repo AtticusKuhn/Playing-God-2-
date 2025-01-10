@@ -8,12 +8,15 @@ from dataclasses import dataclass
 from typing import Optional, List, Any, Callable
 import pygame
 
+
 @dataclass
 class TileCoordinate:
     """Represents a tile's coordinates and zoom level."""
+
     x: int
     y: int
     zoom: int
+
 
 class AsyncTileLoader:
     """Handles asynchronous loading of map tiles."""
@@ -27,9 +30,9 @@ class AsyncTileLoader:
         self._executor = ThreadPoolExecutor(max_workers=self.MAX_WORKERS)
 
     async def load_tile_batch(
-        self, 
-        tiles_to_load: List[TileCoordinate], 
-        fetch_callback: Callable[[int, int, int], Optional[pygame.Surface]]
+        self,
+        tiles_to_load: List[TileCoordinate],
+        fetch_callback: Callable[[int, int, int], Optional[pygame.Surface]],
     ) -> List[Any]:
         """Load a batch of tiles asynchronously.
 
@@ -48,7 +51,7 @@ class AsyncTileLoader:
     def load_tiles_threadsafe(
         self,
         tiles_to_load: List[TileCoordinate],
-        fetch_callback: Callable[[int, int, int], Optional[pygame.Surface]]
+        fetch_callback: Callable[[int, int, int], Optional[pygame.Surface]],
     ) -> Optional[List[Any]]:
         """Load tiles in a thread-safe manner.
 
@@ -60,8 +63,7 @@ class AsyncTileLoader:
             Optional list of loaded tiles
         """
         future = asyncio.run_coroutine_threadsafe(
-            self.load_tile_batch(tiles_to_load, fetch_callback), 
-            self._loop
+            self.load_tile_batch(tiles_to_load, fetch_callback), self._loop
         )
 
         try:

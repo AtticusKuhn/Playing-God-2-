@@ -4,11 +4,11 @@ from __future__ import annotations
 
 import pygame
 from typing import List, Tuple, Optional
-from dataclasses import dataclass
 
 from async_tile_loader import TileCoordinate
 from tile_renderer import TileRenderer
 from managers.viewport_manager import ViewportManager
+
 
 class MapRenderer:
     """Handles the rendering of map tiles and coordinates with the viewport."""
@@ -52,8 +52,7 @@ class MapRenderer:
             viewport, self._tile_zoom
         )
         tiles_to_load = [
-            TileCoordinate(x, y, zoom)
-            for x, y, zoom in visible_data.tiles
+            TileCoordinate(x, y, zoom) for x, y, zoom in visible_data.tiles
         ]
         return tiles_to_load, visible_data.scaled_size
 
@@ -98,6 +97,4 @@ class MapRenderer:
         """
         for tile, coord in zip(tiles, coords):
             if tile:
-                self.render_tile(
-                    screen, tile, coord, tile_size_scaled, viewport
-                )
+                self.render_tile(screen, tile, coord, tile_size_scaled, viewport)

@@ -6,14 +6,13 @@ the various components of the map system.
 
 from __future__ import annotations
 
-import asyncio
 import pygame
-from typing import Optional, List
 
-from async_tile_loader import AsyncTileLoader, TileCoordinate
+from async_tile_loader import AsyncTileLoader
 from tile_coordinator import TileCoordinator
 from map_renderer import MapRenderer
 from managers.viewport_manager import ViewportManager
+
 
 class MapManager:
     """Coordinates the map system components.
@@ -57,13 +56,17 @@ class MapManager:
         self.tile_coordinator.ensure_background_loader(self.async_loader._loop)
 
         # Calculate visible tiles
-        tiles_to_load, tile_size_scaled = self.map_renderer.prepare_visible_tiles(viewport)
+        tiles_to_load, tile_size_scaled = self.map_renderer.prepare_visible_tiles(
+            viewport
+        )
 
         # Separate tiles into cached and uncached
         uncached_tiles = []
         for coord in tiles_to_load:
             # Add to preload queue for surrounding tiles
-            self.tile_coordinator.preload_surrounding_tiles(coord.x, coord.y, coord.zoom)
+            self.tile_coordinator.preload_surrounding_tiles(
+                coord.x, coord.y, coord.zoom
+            )
 
             # Check if tile is already in cache
             if tile := self.tile_coordinator.cache_manager.get_from_memory(

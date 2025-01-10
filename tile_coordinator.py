@@ -4,12 +4,13 @@ from __future__ import annotations
 
 import asyncio
 import pygame
-from typing import Optional, Tuple
+from typing import Optional
 
 from coordinates import CoordinateManager
 from cache_manager import CacheManager
 from tile_fetcher import TileFetcher
 from background_loader import BackgroundLoader
+
 
 class TileCoordinator:
     """Coordinates tile fetching, caching, and background loading operations."""
