@@ -51,16 +51,16 @@ class TileRenderer:
 
         # Calculate tile coordinates from world coordinates
         start_x = (
-            math.floor(left / self.scaling_manager.base_tile_size) - self.BUFFER_TILES
+            math.floor(left / self.scaling_manager.get_tile_size(tile_zoom)) - self.BUFFER_TILES
         )
         start_y = (
-            math.floor(top / self.scaling_manager.base_tile_size) - self.BUFFER_TILES
+            math.floor(top / self.scaling_manager.get_tile_size(tile_zoom)) - self.BUFFER_TILES
         )
         end_x = (
-            math.ceil(right / self.scaling_manager.base_tile_size) + self.BUFFER_TILES
+            math.ceil(right / self.scaling_manager.get_tile_size(tile_zoom)) + self.BUFFER_TILES
         )
         end_y = (
-            math.ceil(bottom / self.scaling_manager.base_tile_size) + self.BUFFER_TILES
+            math.ceil(bottom / self.scaling_manager.get_tile_size(tile_zoom)) + self.BUFFER_TILES
         )
 
         # self.tile_size * viewport.state.zoom * (1 / 2) ** (tile_zoom - 1)
@@ -78,7 +78,7 @@ class TileRenderer:
         self,
         tile_x: int,
         tile_y: int,
-        tile_size_scaled: float,
+        zoom: int,
         viewport: "ViewportManager",
     ) -> Tuple[float, float]:
         """Calculate the screen position for a tile.
@@ -93,9 +93,20 @@ class TileRenderer:
             Tuple of (x, y) screen coordinates for the tile
         """
         world_x, world_y = self.scaling_manager.get_world_coordinates(
-            tile_x, tile_y, tile_size_scaled
+            tile_x, tile_y
         )
-        return viewport.world_to_screen(world_x, world_y)
+        world_x *= (1 / 2) ** (zoom - 1)
+        world_y *= (1 / 2) ** (zoom - 1)
+        # Calculate relative position to camera
+        rel_x = world_x - viewport.state.world_x
+        rel_y = world_y - viewport.state.world_y
+
+        # Apply zoom and center on screen
+        screen_x = (rel_x * viewport.state.zoom) + (viewport.state.width / 2)
+        screen_y = (rel_y * viewport.state.zoom) + (viewport.state.height / 2)
+
+        return screen_x, screen_y
+        # return viewport.world_to_screen(world_x, world_y)
 
     def scale_tile(
         self, tile: pygame.Surface, tile_size_scaled: float
@@ -109,10 +120,10 @@ class TileRenderer:
         Returns:
             Scaled tile surface if scaling is needed, original surface otherwise
         """
-        if tile_size_scaled != self.scaling_manager.base_tile_size:
-            scaled_size = int(tile_size_scaled)
-            return pygame.transform.scale(tile, (scaled_size, scaled_size))
-        return tile
+        # if tile_size_scaled != self.scaling_manager.base_tile_size:
+        #     scaled_size = int(tile_size_scaled)
+        return pygame.transform.scale(tile, (tile_size_scaled, tile_size_scaled))
+        # return tile
 
     def render_tile(
         self,
@@ -130,4 +141,5 @@ class TileRenderer:
             tile_size_scaled: Current scaled size of tiles
         """
         scaled_tile = self.scale_tile(tile, tile_size_scaled)
+        print(f"tile_size_scaled = {tile_size_scaled}")
         screen.blit(scaled_tile, position)

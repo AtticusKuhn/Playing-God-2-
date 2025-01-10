@@ -76,8 +76,9 @@ class MapRenderer:
             viewport, self._tile_zoom
         )
         position = self.tile_renderer.get_screen_position(
-            coord.x, coord.y, tile_size_scaled, viewport
+            coord.x, coord.y, self._tile_zoom, viewport
         )
+        print(f"position = {position}")
         self.tile_renderer.render_tile(screen, tile, position, tile_size_scaled)
 
     def render_loaded_tiles(
