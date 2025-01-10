@@ -52,9 +52,10 @@ class CameraManager:
     def _adjust_zoom(self, factor: float) -> None:
         """Adjust zoom level by a factor, keeping it within bounds."""
         new_zoom = self.state.zoom * factor
-        self.state.zoom = max(
-            CameraConfig.MIN_ZOOM, min(new_zoom, CameraConfig.MAX_ZOOM)
-        )
+        self.state.zoom = new_zoom
+        # self.state.zoom = max(
+        #     CameraConfig.MIN_ZOOM, min(new_zoom, CameraConfig.MAX_ZOOM)
+        # )
 
     def get_transform_params(self) -> tuple[float, float, float]:
         """Get the current transform parameters for rendering.

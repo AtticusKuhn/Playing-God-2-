@@ -36,7 +36,8 @@ class MapRenderer:
         Args:
             viewport: The viewport manager containing current view state
         """
-        self._tile_zoom = int(viewport.state.zoom)
+        self._tile_zoom: int = max(1, int(viewport.state.zoom / 2))
+        print("self._tile_zoom = ", self._tile_zoom)
         self._zoom = viewport.state.zoom % self._tile_zoom
 
     def prepare_visible_tiles(self, viewport: ViewportManager) -> List[TileCoordinate]:
