@@ -56,9 +56,7 @@ class MapManager:
         self.tile_coordinator.ensure_background_loader(self.async_loader._loop)
 
         # Calculate visible tiles
-        tiles_to_load, tile_size_scaled = self.map_renderer.prepare_visible_tiles(
-            viewport
-        )
+        tiles_to_load = self.map_renderer.prepare_visible_tiles(viewport)
 
         # Separate tiles into cached and uncached
         uncached_tiles = []
@@ -72,9 +70,7 @@ class MapManager:
             if tile := self.tile_coordinator.cache_manager.get_from_memory(
                 coord.x, coord.y, coord.zoom
             ):
-                self.map_renderer.render_tile(
-                    screen, tile, coord, tile_size_scaled, viewport
-                )
+                self.map_renderer.render_tile(screen, tile, coord, viewport)
             else:
                 uncached_tiles.append(coord)
 
@@ -84,7 +80,7 @@ class MapManager:
                 uncached_tiles, self.tile_coordinator.fetch_tile
             ):
                 self.map_renderer.render_loaded_tiles(
-                    screen, loaded_tiles, uncached_tiles, tile_size_scaled, viewport
+                    screen, loaded_tiles, uncached_tiles, viewport
                 )
 
     async def cleanup(self) -> None:

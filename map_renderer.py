@@ -3,11 +3,12 @@
 from __future__ import annotations
 
 import pygame
-from typing import List, Tuple, Optional
+from typing import List, Optional
 
 from async_tile_loader import TileCoordinate
 from tile_renderer import TileRenderer
 from managers.viewport_manager import ViewportManager
+from tile_scaling import TileScalingManager
 
 
 class MapRenderer:
@@ -27,6 +28,7 @@ class MapRenderer:
         self._window_height = window_height
         self._tile_zoom = 1
         self._zoom = 1
+        self.scaling_manager = TileScalingManager(self.TILE_SIZE)
 
     def update_zoom(self, viewport: ViewportManager) -> None:
         """Update zoom levels based on viewport state.
@@ -37,9 +39,7 @@ class MapRenderer:
         self._tile_zoom = int(viewport.state.zoom)
         self._zoom = viewport.state.zoom % self._tile_zoom
 
-    def prepare_visible_tiles(
-        self, viewport: ViewportManager
-    ) -> Tuple[List[TileCoordinate], float]:
+    def prepare_visible_tiles(self, viewport: ViewportManager) -> List[TileCoordinate]:
         """Calculate visible tiles and their scaled size.
 
         Args:
@@ -54,14 +54,13 @@ class MapRenderer:
         tiles_to_load = [
             TileCoordinate(x, y, zoom) for x, y, zoom in visible_data.tiles
         ]
-        return tiles_to_load, visible_data.scaled_size
+        return tiles_to_load
 
     def render_tile(
         self,
         screen: pygame.Surface,
         tile: pygame.Surface,
         coord: TileCoordinate,
-        tile_size_scaled: float,
         viewport: ViewportManager,
     ) -> None:
         """Render a single tile to the screen.
@@ -70,9 +69,12 @@ class MapRenderer:
             screen: Surface to draw on
             tile: The tile surface to render
             coord: Coordinates of the tile
-            tile_size_scaled: Current scaled size of tiles
             viewport: Current viewport
         """
+        # Calculate scaled tile size for rendering
+        tile_size_scaled = self.scaling_manager.get_scaled_tile_size(
+            viewport, self._tile_zoom
+        )
         position = self.tile_renderer.get_screen_position(
             coord.x, coord.y, tile_size_scaled, viewport
         )
@@ -83,7 +85,7 @@ class MapRenderer:
         screen: pygame.Surface,
         tiles: List[Optional[pygame.Surface]],
         coords: List[TileCoordinate],
-        tile_size_scaled: float,
+        # tile_size_scaled: float,
         viewport: ViewportManager,
     ) -> None:
         """Render a batch of loaded tiles to the screen.
@@ -95,6 +97,7 @@ class MapRenderer:
             tile_size_scaled: Scaled tile size
             viewport: Current viewport
         """
+
         for tile, coord in zip(tiles, coords):
             if tile:
-                self.render_tile(screen, tile, coord, tile_size_scaled, viewport)
+                self.render_tile(screen, tile, coord, viewport)

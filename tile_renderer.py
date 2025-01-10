@@ -4,13 +4,14 @@ from typing import Tuple, List, NamedTuple
 import pygame
 import math
 from managers.viewport_manager import ViewportManager
+from tile_scaling import TileScalingManager
 
 
 class VisibleTileData(NamedTuple):
     """Data structure for visible tile information."""
 
     tiles: List[Tuple[int, int, int]]  # List of (x, y, zoom) tuples
-    scaled_size: float  # Scaled size of tiles for rendering
+    # scaled_size: float  # Scaled size of tiles for rendering
 
 
 class TileRenderer:
@@ -32,7 +33,7 @@ class TileRenderer:
         """
         self.window_width = window_width
         self.window_height = window_height
-        self.tile_size = tile_size
+        self.scaling_manager = TileScalingManager(tile_size)
 
     def calculate_visible_tiles(
         self, viewport: "ViewportManager", tile_zoom: int
@@ -49,13 +50,20 @@ class TileRenderer:
         left, top, right, bottom = viewport.get_visible_bounds()
 
         # Calculate tile coordinates from world coordinates
-        start_x = math.floor(left / self.tile_size) - self.BUFFER_TILES
-        start_y = math.floor(top / self.tile_size) - self.BUFFER_TILES
-        end_x = math.ceil(right / self.tile_size) + self.BUFFER_TILES
-        end_y = math.ceil(bottom / self.tile_size) + self.BUFFER_TILES
+        start_x = (
+            math.floor(left / self.scaling_manager.base_tile_size) - self.BUFFER_TILES
+        )
+        start_y = (
+            math.floor(top / self.scaling_manager.base_tile_size) - self.BUFFER_TILES
+        )
+        end_x = (
+            math.ceil(right / self.scaling_manager.base_tile_size) + self.BUFFER_TILES
+        )
+        end_y = (
+            math.ceil(bottom / self.scaling_manager.base_tile_size) + self.BUFFER_TILES
+        )
 
-        # Calculate scaled tile size for rendering
-        scaled_tile_size = self.tile_size * viewport.state.zoom
+        # self.tile_size * viewport.state.zoom * (1 / 2) ** (tile_zoom - 1)
 
         # Generate list of visible tiles using list comprehension
         visible_tiles = [
@@ -64,7 +72,7 @@ class TileRenderer:
             for x in range(start_x, end_x)
         ]
 
-        return VisibleTileData(visible_tiles, scaled_tile_size)
+        return VisibleTileData(visible_tiles)
 
     def get_screen_position(
         self,
@@ -84,9 +92,9 @@ class TileRenderer:
         Returns:
             Tuple of (x, y) screen coordinates for the tile
         """
-        # Use unscaled tile size for world coordinates
-        world_x = tile_x * self.tile_size
-        world_y = tile_y * self.tile_size
+        world_x, world_y = self.scaling_manager.get_world_coordinates(
+            tile_x, tile_y, tile_size_scaled
+        )
         return viewport.world_to_screen(world_x, world_y)
 
     def scale_tile(
@@ -101,7 +109,7 @@ class TileRenderer:
         Returns:
             Scaled tile surface if scaling is needed, original surface otherwise
         """
-        if tile_size_scaled != self.tile_size:
+        if tile_size_scaled != self.scaling_manager.base_tile_size:
             scaled_size = int(tile_size_scaled)
             return pygame.transform.scale(tile, (scaled_size, scaled_size))
         return tile
